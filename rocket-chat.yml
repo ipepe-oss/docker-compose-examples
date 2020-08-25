@@ -1,0 +1,34 @@
+version: '2'
+services:
+  mongo:
+    image: mongo:4.0
+    restart: always
+    network_mode: bridge
+    volumes:
+      - ./data/runtime/db:/data/db
+      - ./data/dump:/dump
+    command: mongod --smallfiles --oplogSize 128 --replSet rs0 --storageEngine=wiredTiger
+
+  rocketchat:
+    image: rocketchat/rocket.chat:latest
+    command: bash -c 'for i in `seq 1 30`; do node main.js && s=$$? && break || s=$$?; echo "Tried $$i times. Waiting 5 secs..."; sleep 5; done; (exit $$s)'
+    restart: always
+    network_mode: bridge
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/rocketchat
+      - ROOT_URL=https://chat.example.org
+      - Accounts_UseDNSDomainCheck=False
+      - MAIL_URL=smtp://azure_1a2b3c@azure.com:1a2b3c@smtp.sendgrid.net:587/
+      - MONGO_OPLOG_URL=mongodb://mongo:27017/local
+    expose:
+      - '3000'
+    links:
+      - mongo:mongo
+    depends_on:
+      - mongo
+    volumes:
+      - ./data/uploads:/app/uploads
+    labels:
+      - "traefik.enable=true"
+      - "traefik.port=3000"
+      - "traefik.frontend.rule=Host:chat.example.org"
