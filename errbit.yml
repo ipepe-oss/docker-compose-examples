@@ -1,0 +1,41 @@
+version: '2'
+services:
+  mongo:
+    image: mongo:4.1
+    restart: always
+    network_mode: bridge
+    volumes:
+      - ./data/db/data:/data/db
+      - ./data/db/dump:/dump
+  errbit:
+    image: errbit/errbit:latest
+    restart: always
+    network_mode: bridge
+    expose:
+      - '8080'
+    depends_on:
+      - mongo
+    links:
+      - mongo
+    environment:
+      - ERRBIT_HOST=errbit.example.org
+      - ERRBIT_ADMIN_EMAIL=email@example.org
+      - ERRBIT_ADMIN_PASSWORD=password
+      - ERRBIT_ADMIN_USER=pptasinski
+      - ERRBIT_EMAIL_FROM=errbit@example.org
+      - EMAIL_DELIVERY_METHOD=smtp
+      - SMTP_SERVER=smtp.sendgrid.net
+      - SMTP_PORT=587
+      - SMTP_USERNAME=azure_1a2b3c@azure.com
+      - SMTP_PASSWORD=1a2b3c
+      - SMTP_ENABLE_STARTTLS_AUTO=true
+      - SMTP_DOMAIN=smtp.sendgrid.net
+      - RACK_ENV=production
+      - RAILS_ENV=production
+      - MONGO_URL=mongodb://mongo:27017/errbit
+      - SECRET_KEY_BASE=1a2b3c
+    labels:
+      - "traefik.enable=true"
+      - "traefik.port=8080"
+      - "traefik.frontend.rule=Host:errbit.example.org"
+
