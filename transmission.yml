@@ -1,0 +1,19 @@
+version: '2'
+services:
+  app:
+    image: linuxserver/transmission
+    hostname: transmission.example.org
+    restart: always
+    network_mode: bridge
+    ports:
+      - '9091:9091'
+      - '51413:51413'
+      - '51413:51413/udp'
+    volumes:
+      - '/opt/docker/transmission/watch:/watch'
+      - '/opt/docker/transmission/config:/config'
+      - '/zdata/share/downloads:/downloads'
+    labels:
+      - "traefik.enable=true"
+      - "traefik.port=9091"
+      - "traefik.frontend.rule=Host:transmission.example.org"
