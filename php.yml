@@ -1,0 +1,14 @@
+version: '2'
+services:
+  app:
+    image: php:7.4-apache
+    restart: always
+    network_mode: bridge
+    expose:
+      - 80
+    volumes:
+      - './html:/var/www/html/'
+    labels:
+      - "traefik.enable=true"
+      - "traefik.port=80"
+      - "traefik.frontend.rule=Host:php.example.org"
