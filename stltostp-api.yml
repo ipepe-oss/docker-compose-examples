@@ -1,0 +1,12 @@
+version: '2'
+services:
+  app:
+    image: ipepe/stltostp-api
+    restart: always
+    network_mode: bridge
+    expose: 
+     - 80
+    labels:
+      - "traefik.enable=true"
+      - "traefik.port=80"
+      - "traefik.frontend.rule=Host:stltostp.3dless.com"
