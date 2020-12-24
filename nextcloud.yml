@@ -1,0 +1,46 @@
+# docker-compose -f nextcloud.yml up -d
+version: '2'
+services:
+  app:
+    image: nextcloud:20-apache
+    restart: always
+    network_mode: bridge
+    links:
+      - redis
+      - db
+    depends_on:
+      - redis
+      - db
+    volumes:
+      - ./data/nextcloud:/var/www/html
+      - ./data/local:/local
+    environment:
+      - MYSQL_PASSWORD=password
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_HOST=db
+      - REDIS_HOST=redis
+    labels:
+      - "traefik.enable=true"
+      - "traefik.port=80"
+      - "traefik.frontend.rule=Host:nextcloud.example.org"
+
+  db:
+    image: mariadb:10.5.8
+    restart: always
+    network_mode: bridge
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    volumes:
+      - ./data/db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_PASSWORD=password
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+
+  redis:
+    image: redis:latest
+    restart: always
+    network_mode: bridge
+    volumes:
+      - ./data/redis:/var/lib/redis
